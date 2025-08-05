@@ -1,52 +1,24 @@
+import dotenv from 'dotenv'
 import { createEventSource } from 'eventsource-client'
-import { sseMessageSchema } from './sse-client/sseMessageSchema'
+import { getRequiredEnv } from './utils/envUtil'
 
-createEventSource({
-  url: 'http://localhost:8080/sse/connect'
+dotenv.config()
+
+const sseClient = createEventSource({
+  url: getRequiredEnv('SSE_URL'),
+  headers: {
+    'auth-device-id': getRequiredEnv('AUTH_DEVICE_ID'),
+    'auth-secret-key': getRequiredEnv('AUTH_SECRET_KEY'),
+  },
+  onMessage: (event) => {
+    console.log(event)
+  },
+  onConnect: () => {
+    console.log('[sse] connected')
+  },
+  onDisconnect: () => {
+    console.log('[sse] disconnected')
+  }
 })
 
-function main() {
-  console.log('========== a ==========')
-  const a = () => {
-    const now = new Date()
-    const refreshEventMessage: any = {
-      topic: 'refreshed-at',
-      message: now.toString()
-    }
-    const { success, data } = sseMessageSchema.safeParse(refreshEventMessage)
-
-    console.log(success)
-    console.log(data)
-  }
-  a()
-
-  console.log('========== b ==========')
-  const b = () => {
-    const now = new Date()
-    const updateEventMessage: any = {
-      topic: 'updated-at',
-      message: now.toString()
-    }
-    const { success, data } = sseMessageSchema.safeParse(updateEventMessage)
-
-    console.log(success)
-    console.log(data)
-  }
-  b()
-
-  console.log('========== c ==========')
-  const c = () => {
-    const channelMessage: any = {
-      topic: 'channel/chzzk/7377716c1d4389a852b5b3c0189e10c2/state',
-      message: 'open'
-    }
-
-    const { success, data } = sseMessageSchema.safeParse(channelMessage)
-
-    console.log(success)
-    console.log(data)
-  }
-  c()
-}
-
-main()
+sseClient.connect()
