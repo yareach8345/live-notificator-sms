@@ -1,0 +1,90 @@
+import { SseProcessor } from './SseProcessor'
+import { SseMessage } from './sseMessageSchema'
+
+describe('SseProcessor 테스트', () => {
+  const processor = new SseProcessor()
+
+  const mockStateMessages = [
+    {
+      topic: 'channel/platform1/0001/state',
+      payload: 'open'
+    },
+    {
+      topic: 'channel/platform1/0001/state',
+      payload: 'close'
+    }
+  ]
+
+  const mockRefreshedMessage = {
+    topic: 'refreshed-at',
+    payload: Date.now().toString()
+  }
+
+  const mockUpdatedMessage = {
+    topic: 'refreshed-at',
+    payload: Date.now().toString()
+  }
+
+  const passStateMessage = () => {
+    mockStateMessages.forEach((message) => {
+      processor.passMessage({ data: JSON.stringify(message) })
+    })
+  }
+
+  beforeEach(() => {
+    processor.clearMessageQueue()
+  })
+
+  describe('passMessage 메서드로 state 메시지를 추가한다', () => {
+    test('passStateMessage', () => {
+      passStateMessage()
+
+      expect(processor.getNumberOfStoredMessages()).toBe(2)
+
+      expect(processor.getStoredMessages()).toEqual(mockStateMessages)
+    })
+
+    test('passMessage에 updated-at 메시지를 보내면 메시지큐가 초기화 됨', () => {
+      passStateMessage()
+
+      const numberOfStoredMessagesBeforePassUpdatedAtMessage = processor.getNumberOfStoredMessages()
+      processor.passMessage({ data: JSON.stringify(mockUpdatedMessage) })
+
+      const numberOfStoredMessagesAfterPassUpdatedAtMessage = processor.getNumberOfStoredMessages()
+
+      expect(numberOfStoredMessagesBeforePassUpdatedAtMessage).toBe(2)
+      expect(numberOfStoredMessagesAfterPassUpdatedAtMessage).toBe(0)
+    })
+
+    test('passMessage에 refreshed-at 메시지를 보내면 메시지큐가 초기화 되고 콜백으로 이때까지 받은 메시지들을 받음', () => {
+      passStateMessage()
+
+      const refreshedHandler = jest.fn<void, [SseMessage[]]>()
+
+      processor.setRefreshedHandler(refreshedHandler)
+
+      const numberOfStoredMessagesBeforePassRefreshedAtMessage = processor.getNumberOfStoredMessages()
+
+      processor.passMessage({ data: JSON.stringify(mockRefreshedMessage) })
+
+      const numberOfStoredMessagesAfterPassRefreshedAtMessage = processor.getNumberOfStoredMessages()
+
+      expect(numberOfStoredMessagesBeforePassRefreshedAtMessage).toBe(2)
+      expect(numberOfStoredMessagesAfterPassRefreshedAtMessage).toBe(0)
+
+      expect(refreshedHandler).toHaveBeenCalled()
+      expect(refreshedHandler).toHaveBeenCalledWith(mockStateMessages)
+    })
+
+    test('passMessage로 다른 형식의 메시지를 보내면 특별한 일이 일어나지 않음', () => {
+      processor.passMessage({
+        data: JSON.stringify({
+          topic: 'undefined-topic',
+          data: 'some data'
+        })
+      })
+
+      expect(processor.getNumberOfStoredMessages()).toBe(0)
+    })
+  })
+})
