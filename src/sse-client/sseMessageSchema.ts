@@ -9,3 +9,5 @@ export const sseMessageSchema = z.object({
   ),
   payload: z.string()
 })
+
+export type SseMessage = z.infer<typeof sseMessageSchema>
