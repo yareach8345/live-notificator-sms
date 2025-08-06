@@ -16,9 +16,9 @@ export class SseProcessor {
   }
 
   passMessage = (event: EventSourceMessage) => {
-    const parsedMessage = parseMessage(event)
+    const { success, data: parsedMessage } = parseMessage(event)
 
-    if(parsedMessage === null) {
+    if(!success) {
       return
     }
 
@@ -35,7 +35,7 @@ export class SseProcessor {
         }
         this.clearMessageQueue()
         break
-      case 'update':
+      case 'updated':
         this.clearMessageQueue()
         break
     }

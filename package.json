@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node ./src/index.ts",
-    "dev" : "nodemon"
+    "dev" : "nodemon",
+    "test": "jest"
   },
   "dependencies": {
     "dotenv": "^17.2.1",

@@ -13,19 +13,17 @@ export const getMessageType = (event: SseMessage) => {
   }
 
   if(event.topic === channelUpdatedEvent) {
-    return 'update'
+    return 'updated'
   }
 
   if(channelEventRegex.exec(event.topic)?.groups?.type === 'state') {
     return 'state'
   }
 
-  return 'undefined'
+  return 'unknown'
 }
 
 export const parseMessage = (event: EventSourceMessage) => {
   const parsedEvent = JSON.parse(event.data)
-  const { success, data } = sseMessageSchema.safeParse(parsedEvent)
-
-  return success ? data : null
+  return sseMessageSchema.safeParse(parsedEvent)
 }
