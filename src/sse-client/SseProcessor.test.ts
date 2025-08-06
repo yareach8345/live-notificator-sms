@@ -15,6 +15,16 @@ describe('SseProcessor 테스트', () => {
     }
   ]
 
+  const mockChannelAddedMessage = {
+    topic: 'channel/platform1/0001/state',
+    payload: 'added'
+  }
+
+  const mockChannelDeletedMessage = {
+    topic: 'channel/platform1/0001/state',
+    payload: 'deleted'
+  }
+
   const mockRefreshedMessage = {
     topic: 'refreshed-at',
     payload: Date.now().toString()
@@ -74,6 +84,14 @@ describe('SseProcessor 테스트', () => {
 
       expect(refreshedHandler).toHaveBeenCalled()
       expect(refreshedHandler).toHaveBeenCalledWith(mockStateMessages)
+    })
+
+    test('passMessage로 open과 close외의 다른 메시지를 보내면 메시지 큐에 저장되지 않음', () => {
+      mockStateMessages.forEach(message => processor.passMessage({ data: JSON.stringify(message) }))
+      processor.passMessage({ data: JSON.stringify(mockChannelAddedMessage) })
+      processor.passMessage({ data: JSON.stringify(mockChannelDeletedMessage) })
+
+      expect(processor.getNumberOfStoredMessages()).toBe(2)
     })
 
     test('passMessage로 다른 형식의 메시지를 보내면 특별한 일이 일어나지 않음', () => {

@@ -27,7 +27,9 @@ export class SseProcessor {
     switch (messageType) {
       case 'state':
         console.log('new state', parsedMessage.payload)
-        this.messageQueue.push(parsedMessage)
+        if(parsedMessage.payload === 'open' || parsedMessage.payload === 'close') {
+          this.messageQueue.push(parsedMessage)
+        }
         break
       case 'refreshed':
         if(this.refreshedHandler) {
