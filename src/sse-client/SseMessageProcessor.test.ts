@@ -1,8 +1,8 @@
-import { SseProcessor } from './SseProcessor'
+import { SseMessageProcessor } from './SseMessageProcessor'
 import { SseMessage } from './sseMessageSchema'
 
 describe('SseProcessor 테스트', () => {
-  const processor = new SseProcessor()
+  const processor = new SseMessageProcessor()
 
   const mockStateMessages = [
     {

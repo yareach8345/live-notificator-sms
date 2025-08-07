@@ -4,12 +4,12 @@ dotenv.config()
 
 import { createEventSource } from 'eventsource-client'
 import { getRequiredEnv } from './utils/envUtil'
-import { SseProcessor } from './sse-client/SseProcessor'
+import { SseMessageProcessor } from './sse-client/SseMessageProcessor'
 import { authDeviceId, authSecretKey } from './constants/auth'
 
 dotenv.config()
 
-const sseProcessor = new SseProcessor()
+const sseProcessor = new SseMessageProcessor()
 
 const sseClient = createEventSource({
   url: getRequiredEnv('SSE_URL'),
