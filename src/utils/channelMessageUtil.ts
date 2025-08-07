@@ -19,7 +19,7 @@ export const transformToChannelMessage = (sseMessage: ParsedSseMessage): Channel
 
   const channelId: ChannelId = {
     platform: topicMatchResult.groups.platform,
-    id: topicMatchResult.groups.id,
+    id: topicMatchResult.groups.channelId,
   }
 
   const newState = sseMessage.payload

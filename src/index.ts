@@ -34,4 +34,10 @@ sseProcessor.setChannelStateUpdatedHandler(messages => {
   console.groupEnd()
 })
 
+sseProcessor.setChannelAddDeleteHandler(messages => {
+  console.group('add delete!')
+  console.log(messages)
+  console.groupEnd()
+})
+
 sseClient.connect()
