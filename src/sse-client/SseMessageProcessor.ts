@@ -56,7 +56,8 @@ export class SseMessageProcessor {
   }
 
   processRefreshMessage = (_message: ParsedSseMessage) => {
-    console.log('[sse processor] received refreshed message')
+    const now = new Date()
+    console.log(`[sse processor] received refreshed message at ${now.toString()}`)
     this.clearMessageQueue()
   }
 
