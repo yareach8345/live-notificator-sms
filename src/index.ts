@@ -24,7 +24,7 @@ const sseClient = createEventSource({
   }
 })
 
-sseProcessor.setRefreshedHandler(messages => {
+sseProcessor.setUpdatedHandler(messages => {
   console.group('refreshed!')
   console.log(messages)
   console.groupEnd()

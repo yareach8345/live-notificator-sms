@@ -5,10 +5,10 @@ import { getMessageType, parseMessage } from '../utils/sseUtil'
 export class SseProcessor {
   private readonly messageQueue: SseMessage[] = []
 
-  private refreshedHandler: ((messages: SseMessage[]) => void) | null = null
+  private updatedHandler: ((messages: SseMessage[]) => void) | null = null
 
-  setRefreshedHandler = (newHandler: (message: SseMessage[]) => void): void => {
-    this.refreshedHandler = newHandler
+  setUpdatedHandler = (newHandler: (message: SseMessage[]) => void): void => {
+    this.updatedHandler = newHandler
   }
 
   clearMessageQueue = () => {
@@ -31,13 +31,13 @@ export class SseProcessor {
           this.messageQueue.push(parsedMessage)
         }
         break
-      case 'refreshed':
-        if(this.refreshedHandler) {
-          this.refreshedHandler([...this.messageQueue])
+      case 'updated':
+        if(this.updatedHandler) {
+          this.updatedHandler([...this.messageQueue])
         }
         this.clearMessageQueue()
         break
-      case 'updated':
+      case 'refreshed':
         this.clearMessageQueue()
         break
     }
