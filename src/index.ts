@@ -1,7 +1,11 @@
 import dotenv from 'dotenv'
+
+dotenv.config()
+
 import { createEventSource } from 'eventsource-client'
 import { getRequiredEnv } from './utils/envUtil'
 import { SseProcessor } from './sse-client/SseProcessor'
+import { authDeviceId, authSecretKey } from './constants/auth'
 
 dotenv.config()
 
@@ -10,8 +14,8 @@ const sseProcessor = new SseProcessor()
 const sseClient = createEventSource({
   url: getRequiredEnv('SSE_URL'),
   headers: {
-    'auth-device-id': getRequiredEnv('AUTH_DEVICE_ID'),
-    'auth-secret-key': getRequiredEnv('AUTH_SECRET_KEY'),
+    'auth-device-id': authDeviceId,
+    'auth-secret-key': authSecretKey,
   },
   onMessage: (event) => {
     sseProcessor.passMessage(event)
