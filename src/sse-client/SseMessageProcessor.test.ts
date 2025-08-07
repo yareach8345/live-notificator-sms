@@ -26,11 +26,6 @@ describe('SseProcessor 테스트', () => {
     payload: 'deleted'
   }
 
-  const mockRefreshedMessage = {
-    topic: 'refreshed-at',
-    payload: Date.now().toString()
-  }
-
   const mockUpdatedMessage = {
     topic: 'updated-at',
     payload: Date.now().toString()
@@ -85,6 +80,20 @@ describe('SseProcessor 테스트', () => {
 
       expect(updatedHandler).toHaveBeenCalled()
       expect(updatedHandler).toHaveBeenCalledWith(mockStateMessages.map(transformToChannelMessage))
+    })
+
+    test('passMessage에 updated-at 메시지를 보내도 큐에 메시지가 없다면 핸들러가 호출되지 않음', () => {
+      const updatedHandler = jest.fn<void, [ChannelStateMessage[]]>()
+      processor.setChannelStateUpdatedHandler(updatedHandler)
+
+      const numberOfStoredMessagesBeforePassRefreshedAtMessage = processor.getNumberOfStoredMessages()
+      processor.passMessage({ data: JSON.stringify(mockUpdatedMessage) })
+      const numberOfStoredMessagesAfterPassRefreshedAtMessage = processor.getNumberOfStoredMessages()
+
+      expect(numberOfStoredMessagesBeforePassRefreshedAtMessage).toBe(0)
+      expect(numberOfStoredMessagesAfterPassRefreshedAtMessage).toBe(0)
+
+      expect(updatedHandler).not.toHaveBeenCalled()
     })
 
     test('passMessage로 open과 close외의 다른 메시지를 보내면 메시지 큐에 저장되지 않음', () => {

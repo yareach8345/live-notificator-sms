@@ -43,9 +43,15 @@ export class SseMessageProcessor {
 
   processUpdateMessage = (_message: ParsedSseMessage) => {
     console.log('[sse processor] received updated message')
+
+    if(this.messageQueue.length === 0) {
+      return
+    }
+
     if(this.channelStateUpdatedHandler) {
       this.channelStateUpdatedHandler([...this.messageQueue])
     }
+
     this.clearMessageQueue()
   }
 
