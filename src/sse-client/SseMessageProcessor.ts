@@ -5,12 +5,12 @@ import { getMessageType, parseMessage } from '../utils/sseUtil'
 export class SseMessageProcessor {
   private readonly messageQueue: SseMessage[] = []
 
-  private updatedHandler: ((messages: SseMessage[]) => void) | null = null
+  private channelStateUpdatedHandler: ((messages: SseMessage[]) => void) | null = null
 
   private channelAddDeleteHandler: ((messages: SseMessage) => void) | null = null
 
-  setUpdatedHandler = (newHandler: (message: SseMessage[]) => void): void => {
-    this.updatedHandler = newHandler
+  setChannelStateUpdatedHandler = (newHandler: (message: SseMessage[]) => void): void => {
+    this.channelStateUpdatedHandler = newHandler
   }
 
   setChannelAddDeleteHandler = (newHandler: (messages: SseMessage) => void): void => {
@@ -39,8 +39,8 @@ export class SseMessageProcessor {
 
   processUpdateMessage = (_message: SseMessage) => {
     console.log('[sse processor] received updated message')
-    if(this.updatedHandler) {
-      this.updatedHandler([...this.messageQueue])
+    if(this.channelStateUpdatedHandler) {
+      this.channelStateUpdatedHandler([...this.messageQueue])
     }
     this.clearMessageQueue()
   }

@@ -71,7 +71,7 @@ describe('SseProcessor 테스트', () => {
 
       const updatedHandler = jest.fn<void, [SseMessage[]]>()
 
-      processor.setUpdatedHandler(updatedHandler)
+      processor.setChannelStateUpdatedHandler(updatedHandler)
 
       const numberOfStoredMessagesBeforePassRefreshedAtMessage = processor.getNumberOfStoredMessages()
 
@@ -103,6 +103,27 @@ describe('SseProcessor 테스트', () => {
       })
 
       expect(processor.getNumberOfStoredMessages()).toBe(0)
+    })
+
+    test('passMessage로 added 메시지를 보내면 channelAddDeleteHandler로 채널 정보를 보냄', () => {
+      const handler = jest.fn<void, [SseMessage]>()
+      processor.setChannelAddDeleteHandler(handler)
+
+      processor.passMessage({ data: JSON.stringify(mockChannelAddedMessage) })
+
+      expect(handler).toHaveBeenCalled()
+      expect(handler).toHaveBeenCalledWith(mockChannelAddedMessage)
+    })
+
+
+    test('passMessage로 deleted 메시지를 보내면 channelAddDeleteHandler로 채널 정보를 보냄', () => {
+      const handler = jest.fn<void, [SseMessage]>()
+      processor.setChannelAddDeleteHandler(handler)
+
+      processor.passMessage({ data: JSON.stringify(mockChannelDeletedMessage) })
+
+      expect(handler).toHaveBeenCalled()
+      expect(handler).toHaveBeenCalledWith(mockChannelDeletedMessage)
     })
   })
 })
