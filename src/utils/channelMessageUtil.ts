@@ -5,8 +5,9 @@ import { ChannelId } from '../../types/ChannelId'
 import { AllowedState, ChannelStateMessage } from '../../types/ChannelStateMessage'
 import { NotSupportedStateError } from '../error/NotSupportedStateError'
 import { allowedStates } from '../constants/channelStates'
+import { NotSupportedMessageError } from '../error/NotSupportedMessageError'
 
-function isAllowedState(state: string): state is AllowedState {
+export function isAllowedState(state: string): state is AllowedState {
   return (allowedStates as readonly string[]).includes(state);
 }
 
@@ -15,6 +16,10 @@ export const transformToChannelMessage = (sseMessage: ParsedSseMessage): Channel
 
   if(!topicMatchResult || !topicMatchResult.groups) {
     throw new RegexMatchFailError(sseMessage.topic, channelEventRegex)
+  }
+
+  if(topicMatchResult.groups.type !== 'state') {
+    throw new NotSupportedMessageError(sseMessage.topic, 'This function can process only topics end with "state"')
   }
 
   const channelId: ChannelId = {
