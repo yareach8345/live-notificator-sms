@@ -1,5 +1,5 @@
 import z from 'zod'
-import { channelEventRegex, channelRefreshEvent, channelUpdatedEvent } from './topics'
+import { channelEventRegex, channelRefreshEvent, channelUpdatedEvent } from '../constants/topics'
 
 export const sseMessageSchema = z.object({
   topic: z.string().refine(val =>
@@ -10,4 +10,4 @@ export const sseMessageSchema = z.object({
   payload: z.string()
 })
 
-export type SseMessage = z.infer<typeof sseMessageSchema>
+export type ParsedSseMessage = z.infer<typeof sseMessageSchema>

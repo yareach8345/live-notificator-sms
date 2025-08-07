@@ -1,19 +1,21 @@
 import { EventSourceMessage } from 'eventsource-client'
-import { SseMessage } from './sseMessageSchema'
 import { getMessageType, parseMessage } from '../utils/sseUtil'
+import { ChannelStateMessage } from '../../types/ChannelStateMessage'
+import { transformToChannelMessage } from '../utils/channelMessageUtil'
+import { ParsedSseMessage } from './sseMessageSchema'
 
 export class SseMessageProcessor {
-  private readonly messageQueue: SseMessage[] = []
+  private readonly messageQueue: ChannelStateMessage[] = []
 
-  private channelStateUpdatedHandler: ((messages: SseMessage[]) => void) | null = null
+  private channelStateUpdatedHandler: ((messages: ChannelStateMessage[]) => void) | null = null
 
-  private channelAddDeleteHandler: ((messages: SseMessage) => void) | null = null
+  private channelAddDeleteHandler: ((messages: ChannelStateMessage) => void) | null = null
 
-  setChannelStateUpdatedHandler = (newHandler: (message: SseMessage[]) => void): void => {
+  setChannelStateUpdatedHandler = (newHandler: (message: ChannelStateMessage[]) => void): void => {
     this.channelStateUpdatedHandler = newHandler
   }
 
-  setChannelAddDeleteHandler = (newHandler: (messages: SseMessage) => void): void => {
+  setChannelAddDeleteHandler = (newHandler: (messages: ChannelStateMessage) => void): void => {
     this.channelAddDeleteHandler = newHandler
   }
 
@@ -21,23 +23,25 @@ export class SseMessageProcessor {
     this.messageQueue.splice(0, this.messageQueue.length)
   }
 
-  processStateMessage = (message: SseMessage) => {
-    console.log('[sse processor] received state messge', message.payload)
-    switch(message.payload) {
+  processStateMessage = (message: ParsedSseMessage) => {
+    const channelStateMessage = transformToChannelMessage(message)
+
+    console.log('[sse processor] received state messge', channelStateMessage.newState)
+    switch(channelStateMessage.newState) {
       case 'open':
-      case 'close':
-        this.messageQueue.push(message)
+      case 'closed':
+        this.messageQueue.push(channelStateMessage)
         break
       case 'added':
       case 'deleted':
         if(this.channelAddDeleteHandler) {
-          this.channelAddDeleteHandler(message)
+          this.channelAddDeleteHandler(channelStateMessage)
         }
         break
     }
   }
 
-  processUpdateMessage = (_message: SseMessage) => {
+  processUpdateMessage = (_message: ParsedSseMessage) => {
     console.log('[sse processor] received updated message')
     if(this.channelStateUpdatedHandler) {
       this.channelStateUpdatedHandler([...this.messageQueue])
@@ -45,7 +49,7 @@ export class SseMessageProcessor {
     this.clearMessageQueue()
   }
 
-  processRefreshMessage = (_message: SseMessage) => {
+  processRefreshMessage = (_message: ParsedSseMessage) => {
     console.log('[sse processor] received refreshed message')
     this.clearMessageQueue()
   }

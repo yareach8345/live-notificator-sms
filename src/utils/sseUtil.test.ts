@@ -1,6 +1,6 @@
 import { getMessageType, isTargetTopic, parseMessage } from './sseUtil'
 import { EventSourceMessage } from 'eventsource-client'
-import { channelEventRegex, channelRefreshEvent, channelUpdatedEvent } from '../sse-client/topics'
+import { channelEventRegex, channelRefreshEvent, channelUpdatedEvent } from '../constants/topics'
 
 describe('sse util 테스트', () => {
   const channelOpenMessage = {

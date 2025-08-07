@@ -1,0 +1,1 @@
+export const allowedStates = ['open', 'closed', 'added', 'deleted'] as const

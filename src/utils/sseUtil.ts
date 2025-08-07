@@ -1,13 +1,13 @@
-import { SseMessage, sseMessageSchema } from '../sse-client/sseMessageSchema'
-import { channelEventRegex, channelRefreshEvent, channelUpdatedEvent } from '../sse-client/topics'
+import { ParsedSseMessage, sseMessageSchema } from '../sse-client/sseMessageSchema'
+import { channelEventRegex, channelRefreshEvent, channelUpdatedEvent } from '../constants/topics'
 import { EventSourceMessage } from 'eventsource-client'
 
-export const isTargetTopic = (event: SseMessage) =>
+export const isTargetTopic = (event: ParsedSseMessage) =>
   event.topic === channelRefreshEvent ||
   event.topic === channelUpdatedEvent ||
   channelEventRegex.exec(event.topic)?.groups?.type === 'state'
 
-export const getMessageType = (event: SseMessage) => {
+export const getMessageType = (event: ParsedSseMessage) => {
   if(event.topic === channelRefreshEvent) {
     return 'refreshed'
   }

@@ -1,5 +1,6 @@
 import { SseMessageProcessor } from './SseMessageProcessor'
-import { SseMessage } from './sseMessageSchema'
+import { ChannelStateMessage } from '../../types/ChannelStateMessage'
+import { transformToChannelMessage } from '../utils/channelMessageUtil'
 
 describe('SseProcessor 테스트', () => {
   const processor = new SseMessageProcessor()
@@ -11,7 +12,7 @@ describe('SseProcessor 테스트', () => {
     },
     {
       topic: 'channel/platform1/0001/state',
-      payload: 'close'
+      payload: 'closed'
     }
   ]
 
@@ -51,7 +52,7 @@ describe('SseProcessor 테스트', () => {
 
       expect(processor.getNumberOfStoredMessages()).toBe(2)
 
-      expect(processor.getStoredMessages()).toEqual(mockStateMessages)
+      expect(processor.getStoredMessages()).toEqual(mockStateMessages.map(transformToChannelMessage))
     })
 
     test('passMessage에 updated-at 메시지를 보내면 메시지큐가 초기화 됨', () => {
@@ -69,7 +70,7 @@ describe('SseProcessor 테스트', () => {
     test('passMessage에 updated-at 메시지를 보내면 메시지큐가 초기화 되고 콜백으로 이때까지 받은 메시지들을 받음', () => {
       passStateMessage()
 
-      const updatedHandler = jest.fn<void, [SseMessage[]]>()
+      const updatedHandler = jest.fn<void, [ChannelStateMessage[]]>()
 
       processor.setChannelStateUpdatedHandler(updatedHandler)
 
@@ -83,7 +84,7 @@ describe('SseProcessor 테스트', () => {
       expect(numberOfStoredMessagesAfterPassRefreshedAtMessage).toBe(0)
 
       expect(updatedHandler).toHaveBeenCalled()
-      expect(updatedHandler).toHaveBeenCalledWith(mockStateMessages)
+      expect(updatedHandler).toHaveBeenCalledWith(mockStateMessages.map(transformToChannelMessage))
     })
 
     test('passMessage로 open과 close외의 다른 메시지를 보내면 메시지 큐에 저장되지 않음', () => {
@@ -106,24 +107,24 @@ describe('SseProcessor 테스트', () => {
     })
 
     test('passMessage로 added 메시지를 보내면 channelAddDeleteHandler로 채널 정보를 보냄', () => {
-      const handler = jest.fn<void, [SseMessage]>()
+      const handler = jest.fn<void, [ChannelStateMessage]>()
       processor.setChannelAddDeleteHandler(handler)
 
       processor.passMessage({ data: JSON.stringify(mockChannelAddedMessage) })
 
       expect(handler).toHaveBeenCalled()
-      expect(handler).toHaveBeenCalledWith(mockChannelAddedMessage)
+      expect(handler).toHaveBeenCalledWith(transformToChannelMessage(mockChannelAddedMessage))
     })
 
 
     test('passMessage로 deleted 메시지를 보내면 channelAddDeleteHandler로 채널 정보를 보냄', () => {
-      const handler = jest.fn<void, [SseMessage]>()
+      const handler = jest.fn<void, [ChannelStateMessage]>()
       processor.setChannelAddDeleteHandler(handler)
 
       processor.passMessage({ data: JSON.stringify(mockChannelDeletedMessage) })
 
       expect(handler).toHaveBeenCalled()
-      expect(handler).toHaveBeenCalledWith(mockChannelDeletedMessage)
+      expect(handler).toHaveBeenCalledWith(transformToChannelMessage(mockChannelDeletedMessage))
     })
   })
 })
