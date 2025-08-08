@@ -17,7 +17,7 @@ export const fetchChannel = async (channelId: ChannelId) => {
 }
 
 export const fetchChannels = async (channelIds: ChannelId[]) => {
-  return axios.get<ChannelDto>(
+  return axios.get<ChannelDto[]>(
     getChannelsUrl(channelIds),
     {
       headers: {
