@@ -5,5 +5,10 @@ export function getRequiredEnv(envName: string) {
   if (!env) {
     throw new RequiredEnvNotFoundError(envName)
   }
-  return env
+  return env.trim()
+}
+
+export function getRequiredEnvs(envName: string, separator: string = ',') {
+  const env = getRequiredEnv(envName)
+  return env.split(separator).map(env => env.trim())
 }
